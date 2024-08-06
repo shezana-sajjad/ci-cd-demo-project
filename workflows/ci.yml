@@ -1,0 +1,61 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on push to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger the workflow on pull requests to the main branch
+
+jobs:
+  build:
+    runs-on: [self-hosted, ci-cd-demo-project]  # Use self-hosted runner with the tag pclass-Aiman
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Build Docker image
+      run: |
+        echo "Building Docker image..."
+        docker build -t ${{ secrets.DOCKER_IMAGE }} .
+
+  deploy:
+    needs: build
+    runs-on: [self-hosted, ci-cd-demo-project]  # Use self-hosted runner with the tag pclass-Aiman
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy Docker container
+      run: |
+        echo "Deploying Docker container..."
+        docker stop opsoura-site || true
+        docker rm opsoura-site || true
+        docker run -d --name opsoura-site -p 81:80 ${{ secrets.DOCKER_IMAGE }}
+
+  test:
+    needs: deploy
+    runs-on: [self-hosted, ci-cd-demo-project]  # Use self-hosted runner with the tag pclass-Aiman
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install curl
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl
+
+    - name: Test if server is up
+      run: |
+        echo "Testing if the server is up..."
+        sleep 10
+        if [ "$(curl -s -o /dev/null -w "%{http_code}" http://103.172.26.39:81)" == "200" ]; then
+          echo "Server is up and running."
+        else
+          echo "Server is not responding."
+          exit 1
+        fi
