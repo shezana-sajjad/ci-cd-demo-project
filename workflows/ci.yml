@@ -1,0 +1,42 @@
+name: CI/CD Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: |
+          echo "Building Docker image..."
+          docker build -t shezana .
+
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Deploy Docker container
+        run: |
+          echo "Deploying Docker container..."
+          docker stop shezana || true
+          docker rm shezana || true
+          docker run -d --name shezana -p 81:81 shezana
+
+  test:
+    runs-on: self-hosted
+    needs: deploy
+    steps:
+      - name: Test if the server is up
+        run: |
+          echo "Testing if the server is up..."
+          sleep 180
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://103.172.26.39:81)
+          if [ "$STATUS_CODE" -eq 200 ]; then
+          echo "Server is up and running."
+          else
+          echo "Server is not up, status code: $STATUS_CODE"
+          exit 1
+          fi
