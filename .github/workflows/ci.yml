@@ -33,7 +33,7 @@ jobs:
         run: |
           echo "Testing if the server is up..."
           sleep 180
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://103.172.26.39:82)
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://103.151.111.237:82)
           if [ "$STATUS_CODE" -eq 200 ]; then
           echo "Server is up and running."
           else
