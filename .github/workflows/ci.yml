@@ -26,17 +26,31 @@ jobs:
           docker run -d --name shezana -p 81:81 shezana
 
   test:
-    runs-on: self-hosted
-    needs: deploy
-    steps:
-      - name: Test if the server is up
-        run: |
-          echo "Testing if the server is up..."
-          sleep 300
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://103.172.26.39:81)
-          if [ "$STATUS_CODE" -eq 200 ]; then
+  runs-on: self-hosted
+  needs: deploy
+  steps:
+    - name: Test if the server is up
+      run: |
+        echo "Testing if the server is up..."
+        sleep 300
+        echo "Attempting to connect to http://103.172.26.39:81"
+
+        # Check network connectivity
+        if nc -zv 103.172.26.39 81; then
+          echo "Port 81 is open and reachable."
+        else
+          echo "Port 81 is not reachable. Check the server and firewall settings."
+          exit 1
+        fi
+
+        # Perform HTTP request and check response code
+        STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://103.172.26.39:81)
+        echo "HTTP Status Code: $STATUS_CODE"
+        
+        if [ "$STATUS_CODE" -eq 200 ]; then
           echo "Server is up and running."
-          else
+        else
           echo "Server is not up, status code: $STATUS_CODE"
           exit 1
-          fi
+        fi
+      shell: /usr/bin/bash -e {0}
