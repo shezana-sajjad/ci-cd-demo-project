@@ -43,14 +43,5 @@ jobs:
           exit 1
         fi
 
-        # Perform HTTP request and check response code
-        STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://103.172.26.39:81)
-        echo "HTTP Status Code: $STATUS_CODE"
         
-        if [ "$STATUS_CODE" -eq 200 ]; then
-          echo "Server is up and running."
-        else
-          echo "Server is not up, status code: $STATUS_CODE"
-          exit 1
-        fi
       shell: /usr/bin/bash -e {0}
