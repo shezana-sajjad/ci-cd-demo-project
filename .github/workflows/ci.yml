@@ -42,6 +42,3 @@ jobs:
           echo "Port 81 is not reachable. Check the server and firewall settings."
           exit 1
         fi
-
-        
-      shell: /usr/bin/bash -e {0}
