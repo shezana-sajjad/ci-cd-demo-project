@@ -23,7 +23,7 @@ jobs:
           echo "Deploying Docker container..."
           docker stop shezana || true
           docker rm shezana || true
-          docker run -d --name shezana -p 81:81 shezana
+          docker run -d --name shezana -p 82:82 shezana
 
   test:
     runs-on: self-hosted
@@ -33,7 +33,7 @@ jobs:
         run: |
           echo "Testing if the server is up..."
           sleep 180
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://103.172.26.39:81)
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://103.172.26.39:82)
           if [ "$STATUS_CODE" -eq 200 ]; then
           echo "Server is up and running."
           else
